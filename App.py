@@ -11,12 +11,15 @@ import win32api
 import os
 
 # Colors
-WHITE = '#ffffff'
-DARK = '#000000'
-LIGHT = '#b5e2ff'
-BLUE = '#3047ff'
-WHITE_GRAY = '#bdb9b1'
-DARK_GRAY = '#4f4e4d'
+WHITE = '#FFFFFF'
+BLACK = '#000000'
+DARK = '#4D455D'
+PINK = '#FF7483'
+PURPLE = '#7F74B9'
+LIGHT = '#F5E9CF'
+LIGHT_BLUE = '#E9EFFF'
+BLUE = '#0052C0'
+YELLOW = '#FFCC8A'
 
 getApp={".doc":"Microsoft Word",
         ".docx":"Microsoft Word",
@@ -56,49 +59,68 @@ class App(Frame):
         self.initUI()
 
 
-    def Tab1(self, tab1):
+    def Screen(self, screen):
+        # Title Frame
+        textFrame = Frame(screen, bg=LIGHT_BLUE)
+        textFrame.pack(fill=X)
 
-        frame1 = Frame(tab1, bg=WHITE)
-        frame1.pack(fill=X)
+        projectTxt = Label(textFrame, text="MANAGE FILE SYSTEM ON WINDOWS", font=("yu gothic ui", 18, 'bold'),
+                     bg=LIGHT_BLUE, fg=BLUE, width=34)
+        projectTxt.pack(anchor=N, padx=5, pady=20)
 
-        txt1 = Label(frame1, text='UNIVERSITY OF SCIENCE', font=("Georgia", 14, 'bold'), bg=WHITE)
-        txt1.pack(anchor = N, padx=5, pady=3)
+        # Function frame
+        functionFrame = Frame(screen, bg=LIGHT_BLUE)
+        functionFrame.pack()
 
-        frame2 = Frame(tab1, bg=WHITE)
-        frame2.pack(fill=X)
+        label1 = Label(functionFrame, text='Drive Selection', font=("yu gothic ui", 14, 'bold'), fg=BLACK, bg=LIGHT_BLUE)
+        label1.pack(side=LEFT, padx=10, pady=20)
 
-        txt2 = Label(frame2, text="FACULTY OF INFORMATION TECHNOLOGY", font=("Georgia", 12, 'bold'), bg=WHITE)
-        txt2.pack(anchor=N, padx=5, pady=10)
+        drives = win32api.GetLogicalDriveStrings()
+        drives = drives.split('\000')[:-1]
 
-        symbol = Label(frame2, text=" ~~~ ", font=("Georgia", 12), bg=WHITE)
-        symbol.pack(anchor=N, padx=5)
+        selected_drive = tkinter.StringVar()
+        combobox = ttk.Combobox(functionFrame, textvariable=selected_drive)
+        combobox['value'] = drives
+        combobox['state'] = 'readonly'
+        combobox.pack(side=LEFT, padx=10, pady=25)
+        combobox.bind("<<ComboboxSelected>>", self.callback)
 
-        txt3 = Label(frame2, text="OPERATING SYSTEM", font=("Georgia", 12), bg=WHITE)
-        txt3.pack(anchor=N, padx=5, pady=5)
+        # Information frame
+        informationFrame = Frame(screen, bg=LIGHT_BLUE)
+        informationFrame.pack(fill=BOTH, expand=True)
+        button = tkinter.Button(functionFrame, text='Boot Sector', font=("yu gothic ui", 10), bg=PURPLE, activeforeground=WHITE,
+                                activebackground=YELLOW, command=lambda: self.Boot_Sector(selected_drive, informationFrame))
+        button.pack(side=LEFT, padx=10, pady=25)
 
-        txt4 = Label(frame2, text="Project: Manage file system on Windows", font=("Georgia", 14, 'bold'),
-                     bg='#0D4CB2', fg='white', width=34)
-        txt4.pack(anchor=N, padx=5, pady=20)
+        button2 = tkinter.Button(functionFrame, text='Directory', font=("yu gothic ui", 10), bg=PINK, activeforeground=WHITE,
+                                activebackground=YELLOW, command=lambda: self.Directory(selected_drive, informationFrame))
+        button2.pack(side=LEFT, padx=10, pady=25)
 
-        frame3 = Frame(tab1, bg=WHITE)
-        frame3.pack(fill=BOTH, expand=True)
+        # Image frame
+        imgFrame = Frame(screen, bg=LIGHT_BLUE)
+        imgFrame.pack(fill=BOTH, expand=True)
+    
+        imgFrame.img = Image.open("./materials/computer.png")
 
-        txt5 = Label(frame2, text="  Teacher: Lê Viết Long", font=("Georgia", 12), bg=WHITE)
-        txt5.pack(anchor='s', side=LEFT, padx=5, pady=20)
-
-        frame3 = Frame(tab1, bg=WHITE)
-        frame3.pack(fill=BOTH)
-
-        stu = "Students: Lê Anh Thư \n Huỳnh Đức Thiện \n Phan Thanh An \n Nguyễn Hi Hữu \n Nguyễn Minh Đạt"
-        txt6 = Label(frame3, text=stu, font=("Georgia", 12), bg=WHITE)
-        txt6.pack(anchor='s', side=LEFT, padx=5, pady=20)
-
-        frame3.img = Image.open("./materials/logo.png")
-
-        icon = ImageTk.PhotoImage(frame3.img)
-        label = Label(frame3, image=icon, bg=WHITE)
+        icon = ImageTk.PhotoImage(imgFrame.img)
+        label = Label(imgFrame, image=icon, bg=LIGHT_BLUE)
         label.image = icon
-        label.pack(anchor='s',side =RIGHT, padx=20, pady=10)
+        label.pack(anchor='s',side =RIGHT, padx=20, pady=0)
+
+        # teacherTxt = Label(imgFrame, text="Teacher: Le Viet Long", font=("yu gothic ui", 14), bg=LIGHT_BLUE)
+        # teacherTxt.pack(anchor='s', side=LEFT, padx=5, pady=20)
+
+    
+        imgFrame.member = Image.open("./materials/member.png")
+
+        icon = ImageTk.PhotoImage(imgFrame.member)
+        label = Label(imgFrame, image=icon, bg=LIGHT_BLUE)
+        label.image = icon
+        label.pack(anchor='s',side =LEFT, padx=15, pady=30)
+
+        memberTxt = "Members:   Huynh Duc Thien    \nLe Anh Thu - Nguyen Minh Dat\n  Phan Thanh An - Nguyen Hi Huu"
+        memberTxt = Label(imgFrame, text=memberTxt, font=("yu gothic ui", 13), bg=LIGHT_BLUE)
+        memberTxt.pack(anchor='s', side=LEFT, padx=0, pady=25)
 
     def Boot_Sector(self,selected_drive, frame):
         drive = selected_drive.get()
@@ -109,7 +131,7 @@ class App(Frame):
         list = frame.pack_slaves()
         for l in list:
             l.destroy()
-        label = Label(frame, text="BIOS Parameter Block information", font=("Cambria", 12), bg=WHITE)
+        label = Label(frame, text="BIOS Parameter Block information", font=("Cambria", 12), bg=LIGHT_BLUE)
         label.pack(anchor=N, padx=5, pady=5)
         if (win32api.GetVolumeInformation(drive)[4]=='FAT32'):
             path = "\\\.\\"
@@ -119,7 +141,7 @@ class App(Frame):
             pbr_fat = PbrFat(data)
             pbr_fat.readFat()
             txt = pbr_fat.showInfo()
-            text = Text(frame, font=("Cambria", 12), bg=WHITE, spacing1=4, relief=FLAT)
+            text = Text(frame, font=("Cambria", 12), bg=LIGHT_BLUE, spacing1=4, relief=FLAT)
             text.insert(END, txt)
             text.pack(side=LEFT, padx=50, pady=10)
         if (win32api.GetVolumeInformation(selected_drive.get())[4]=='NTFS'):
@@ -129,7 +151,7 @@ class App(Frame):
             print(path)
             boots = BootSectorNTFS(None, 0, 512, path)
             txt = boots.show_infor()
-            text = Text(frame, font=("Cambria", 12), bg=WHITE, spacing1=4, relief=FLAT)
+            text = Text(frame, font=("Cambria", 12), bg=LIGHT_BLUE, spacing1=4, relief=FLAT)
             text.insert(END, txt)
             text.pack(side=LEFT, padx=50, pady=10)
 
@@ -165,7 +187,7 @@ class App(Frame):
             window = Tk()
             window.title(self.tree.item(item, "text"))
             window.geometry("300x300+300+300")
-            text = Text(window, font=("Cambria", 12), bg="white", spacing1=4, relief=FLAT)
+            text = Text(window, font=("Cambria", 12), bg="LIGHT_BLUE", spacing1=4, relief=FLAT)
             text.insert(END, data)
             text.pack()
             window.mainloop()
@@ -265,7 +287,7 @@ class App(Frame):
         xsb = ttk.Scrollbar(frame_left, orient='horizontal', command=self.tree.xview)
         # Right-side
         frame_right = tk.Frame(splitter)
-        text = scrolledtext.ScrolledText(frame_right, font=("Cambria", 12), bg="white", spacing1=4, relief=FLAT)
+        text = scrolledtext.ScrolledText(frame_right, font=("Cambria", 12), bg="LIGHT_BLUE", spacing1=4, relief=FLAT)
 
         # overall layout
         splitter.add(frame_left)
@@ -294,64 +316,30 @@ class App(Frame):
          return eventObject.widget.get()
         # print(dir(eventObject))
 
-    def Tab2(self,tab2):
-        frame1 = Frame(tab2, bg=WHITE)
-        frame1.pack()
-
-        label1 = Label(frame1, text='Drive Selection', font=("Cambria", 10, 'bold'), fg='#356859', bg=WHITE)
-        label1.pack(side=LEFT, padx=10, pady=25)
-
-        drives = win32api.GetLogicalDriveStrings()
-        drives = drives.split('\000')[:-1]
-
-        selected_drive = tkinter.StringVar()
-        combobox = ttk.Combobox(frame1, textvariable=selected_drive)
-        combobox['value'] = drives
-        combobox['state'] = 'readonly'
-        combobox.pack(side=LEFT, padx=10, pady=25)
-        combobox.bind("<<ComboboxSelected>>", self.callback)
-
-        frame2 = Frame(tab2, bg=WHITE)
-        frame2.pack()
-        button = tkinter.Button(frame1, text='Boot Sector', font=("Cambria", 10), bg=WHITE, activeforeground='#fd5523',
-                                activebackground='#37966f', command=lambda: self.Boot_Sector(selected_drive, frame2))
-        button.pack(side=LEFT, padx=10, pady=25)
-
-        button2 = tkinter.Button(frame1, text='Directory', font=("Georgia", 10), bg=WHITE, activeforeground='#fd5523',
-                                activebackground='#37966f', command=lambda: self.Directory(selected_drive, frame2))
-        button2.pack(side=LEFT, padx=10, pady=25)
-
     def initUI(self):
-        self.parent.title("Operating System")
         self.style = ttk.Style()
 
         self.style.theme_create("yummy", parent="alt", settings={
             "TNotebook": {"configure": {"tabmargins": [2, 5, 2, 0], "background": WHITE}},
             "TNotebook.Tab": {
                 "configure": {"padding": [5, 1], "background": WHITE},
-                "map": {"background": [("selected", WHITE)],
+                "map": {"background": [("selected", LIGHT_BLUE)],
                         "expand": [("selected", [1, 1, 1, 0])]}}})
 
         self.pack(fill=BOTH, expand=True)
         self.style.theme_use("yummy")
         tab_control = ttk.Notebook(self)
 
-        tab1 = Frame(tab_control, background=WHITE)
-        tab1.pack()
-        tab2 = Frame(tab_control, background=WHITE)
-        tab2.pack()
+        screen = Frame(tab_control, background=LIGHT_BLUE)
+        screen.pack()
 
-        tab_control.add(tab1, text="General Information")
-
-        tab_control.add(tab2, text="Drive information")
-
-        self.Tab1(tab1)
-        self.Tab2(tab2)
+        tab_control.add(screen, text="FAT-NTFS Project")
+        self.Screen(screen)
         tab_control.pack(expand=1, fill='both')
 
-
-
 root = Tk()
-root.geometry("700x430+100+100")
+root.title("Operating System")
+root.geometry("800x600+100+100")
+root.iconbitmap('./materials/cat.ico')  
 app = App(root)
 root.mainloop()
