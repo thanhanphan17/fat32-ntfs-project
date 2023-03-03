@@ -1,4 +1,3 @@
-import struct
 import win32api
 
 # ntfs boot sector (also called VBR): 512 bytes
@@ -52,13 +51,14 @@ class PartitionBootSector:
         hidden_sectors = int.from_bytes(
             boot_sector[28:32], byteorder="little")
 
-        # for fields occupying 8 bytes, use struct.unpack(format, buffer) instead of int.from_bytes(bytes, byteorder)
-        # because int can only represent 4 bytes
-        total_sectors = struct.unpack("<Q", boot_sector[40:48])[0]
+        total_sectors = int.from_bytes(
+            boot_sector[40:48], byteorder="little")
 
-        logical_cluster_number_for_the_file_MFT = struct.unpack("<Q", boot_sector[48:56])[0]
+        logical_cluster_number_for_the_file_MFT = int.from_bytes(
+            boot_sector[48:56], byteorder="little")
 
-        logical_cluster_number_for_the_file_MFTMirr = struct.unpack("<Q", boot_sector[56:64])[0]
+        logical_cluster_number_for_the_file_MFTMirr = int.from_bytes(
+            boot_sector[56:64], byteorder="little")
 
         clusters_per_file_record_segment = int.from_bytes(
             boot_sector[64:68], byteorder="little")
@@ -66,7 +66,8 @@ class PartitionBootSector:
         clusters_per_index_buffer = int.from_bytes(
             boot_sector[68:69], byteorder="little")
 
-        volume_serial_number = struct.unpack(">Q", boot_sector[72:80])[0]       
+        volume_serial_number = int.from_bytes(
+            boot_sector[72:80], byteorder="big")     
 
         checksum = int.from_bytes(
             boot_sector[80:84], byteorder="little")
