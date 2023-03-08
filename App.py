@@ -1,4 +1,4 @@
-#from boot_sector_fat32 import *
+from fat32_directory import *
 #from partition_boot_sector_ntfs import *
 import tkinter
 from tkinter import *
@@ -127,20 +127,16 @@ class App(Frame):
         if drive == "":
             tkinter.messagebox.showerror(title="Error", message="No drive was chosen! Please choose a drive.")
             return
-        print(drive)
+        # print(drive)
         list = frame.pack_slaves()
         for l in list:
             l.destroy()
         label = Label(frame, text="BIOS Parameter Block information", font=("Cambria", 12), bg=LIGHT_BLUE)
         label.pack(anchor=N, padx=5, pady=5)
         if (win32api.GetVolumeInformation(drive)[4]=='FAT32'):
-            path = "\\\.\\"
-            for i in range(0, len(drive) - 1):
-                path += drive[i]
-            data = BootSectorFAT32().readBootSector(path)
-            pbr_fat = PbrFat(data)
-            pbr_fat.readFat()
-            txt = pbr_fat.showInfo()
+            # print(drive)
+            data = BootSector(drive[0])
+            txt = data.showInfo()
             text = Text(frame, font=("Cambria", 12), bg=LIGHT_BLUE, spacing1=4, relief=FLAT)
             text.insert(END, txt)
             text.pack(side=LEFT, padx=50, pady=10)
@@ -149,8 +145,8 @@ class App(Frame):
             for i in range(0, len(drive) - 1):
                 path += drive[i]
             print(path)
-            boots = BootSectorNTFS(None, 0, 512, path)
-            txt = boots.show_infor()
+            # boots = BootSectorNTFS(None, 0, 512, path)
+            # txt = boots.show_infor()
             text = Text(frame, font=("Cambria", 12), bg=LIGHT_BLUE, spacing1=4, relief=FLAT)
             text.insert(END, txt)
             text.pack(side=LEFT, padx=50, pady=10)

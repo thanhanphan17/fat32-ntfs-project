@@ -67,6 +67,17 @@ class BootSector:
             # Read the first sector, which is the boot sector
             boot_sector = f.read(self.rdet_first_sector + 32 * 20)
     
+        info = ""
+        info += f'\nFat type: {self.fat_type}'
+        info += f'\nBytes per sector: {self.bytes_per_sector}'
+        info += f'\nSectors per cluster: {self.sectors_per_cluster}'
+        info += f'\nReserved sectors: {self.reserved_sectors}'
+        info += f'\nNumber of FATs: {self.num_fats}'
+        info += f'\nFAT size (in sectors): {self.fat_size_sectors}'
+        info += f'\nVolumes size: {self.volumes_size}'
+        info += f'\nTotal sectors: {self.total_sectors}'
+
+        return info
 
     # Calculate the starting byte of a specific sector
     def firstByteOfSector(self, sector):
