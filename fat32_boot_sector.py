@@ -55,27 +55,37 @@ class BootSector:
 
     # Show informations in boot sector
     def showInfo(self):
-        print(f'Fat type: {self.fat_type}')
-        print(f'Bytes per sector: {self.bytes_per_sector}')
-        print(f'Sectors per cluster: {self.sectors_per_cluster}')
-        print(f'Reserved sectors: {self.reserved_sectors}')
-        print(f'Number of FATs: {self.num_fats}')
-        print(f'FAT size (in sectors): {self.fat_size_sectors}')
-        print(f'Volumes size: {self.volumes_size}')
-        print(f'Total sectors: {self.total_sectors}')
         with open(self.__disk, 'rb') as f:
             # Read the first sector, which is the boot sector
-            boot_sector = f.read(self.rdet_first_sector + 32 * 20)
-    
+            boot_sector = f.read(512)
+
         info = ""
-        info += f'\nFat type: {self.fat_type}'
+        info += f'\nJump code: ' + str(hex(int.from_bytes(boot_sector[0 : 3], byteorder='little')))
+        info += f'\nOEM ID: ' + str(boot_sector[3 : 11].decode('utf-8'))
         info += f'\nBytes per sector: {self.bytes_per_sector}'
-        info += f'\nSectors per cluster: {self.sectors_per_cluster}'
+        info += f'\nSectors per cluster (Sc): {self.sectors_per_cluster}'
         info += f'\nReserved sectors: {self.reserved_sectors}'
-        info += f'\nNumber of FATs: {self.num_fats}'
-        info += f'\nFAT size (in sectors): {self.fat_size_sectors}'
-        info += f'\nVolumes size: {self.volumes_size}'
+        info += f'\nNumber of FATs (Nf): {self.num_fats}'
+        info += f'\nRoot entry: ' + str(int.from_bytes(boot_sector[17 : 19], byteorder='little'))
+        info += f'\nMedia type: ' + str(hex(int.from_bytes(boot_sector[21 : 22], byteorder='little')))
+        info += f'\nSectors per track: ' + str(int.from_bytes(boot_sector[24 : 26], byteorder='little'))
+        info += f'\nNumber of heads: ' + str(int.from_bytes(boot_sector[26 : 28], byteorder='little'))
+        info += f'\nHidden sectors: ' + str(int.from_bytes(boot_sector[28 : 32], byteorder='little'))
+        info += f'\nSize of volume (in sectors): {self.volumes_size}'
         info += f'\nTotal sectors: {self.total_sectors}'
+        info += f'\nSectors per FAT (Sf): {self.fat_size_sectors}'
+        info += f'\nPhysical disk number: ' + str(hex(int.from_bytes(boot_sector[64 : 65], byteorder='little')))
+        info += f'\nReserve (for Windows NT): ' + str(int.from_bytes(boot_sector[65 : 66], byteorder='little'))
+        info += f'\nBoot signature: ' + str(hex(int.from_bytes(boot_sector[66 : 67], byteorder='little')))
+        info += f'\nVolume Serial Number: ' + str(hex(int.from_bytes(boot_sector[67 : 71], byteorder='little')))
+        info += f'\nVolume Label: ' + str(boot_sector[71 : 82].decode('utf-8'))
+        info += f'\nSystem ID: ' + str(self.fat_type)
+        info += f'\nFlags describing the drive: ' + str(int.from_bytes(boot_sector[40 : 42], byteorder='little'))
+        info += f'\n\t + FAT version: ' + str(int.from_bytes(boot_sector[42 : 44], byteorder='little'))
+        info += f'\n\t + RDET starting cluster: ' + str(int.from_bytes(boot_sector[44 : 48], byteorder='little'))
+        info += f'\n\t + File system information sector: ' + str(int.from_bytes(boot_sector[48 : 50], byteorder='little'))
+        info += f'\n\t + Backup boot sector position: ' + str(int.from_bytes(boot_sector[50 : 52], byteorder='little'))
+        info += f'\n\t + Reserved number: ' + str(int.from_bytes(boot_sector[52 : 64], byteorder='little'))
 
         return info
 

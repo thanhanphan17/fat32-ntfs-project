@@ -34,11 +34,11 @@ def getDateTimeFromDosTime(dos_date, dos_time, dos_tenth_of_second):
 
 # build directory
 class Entry:
-    def __init__(self, disk, starting_sector, index, fat):
+    def __init__(self, parent_path, disk, starting_sector, index, fat):
         # detect position
         self.status = None
         self.disk = disk
-        # self.path = parent.path + f'//{self.name}'
+        self.path = parent_path
         self.fat = fat
 
         # File's information
@@ -105,8 +105,8 @@ class Entry:
             self.last_accessed_date = getDateTimeFromDosTime(last_accessed_date, 0, 0)
             self.last_modified_time = getDateTimeFromDosTime(last_modified_date, last_modified_time, 0)
         except:
-            pass
-    
+            pass     
+        
 
     # checking entry's status, empty or deleted or containing information
     def isDeleted(self):
@@ -122,7 +122,7 @@ class Entry:
     # get txt file data
     def getTextData(self):
         data = getSectorData(self.disk, self.starting_sector, self.sector_count)
-        text = ""
+        text = ''
         for index in range(0, int(self.sector_count * 512 / ENTRY_SIZE)):
             if int.from_bytes(data[index * ENTRY_SIZE : index * ENTRY_SIZE + 1], byteorder='little') != DELETED_ENTRY:
                 text += data[index * ENTRY_SIZE : (index + 1) * ENTRY_SIZE].decode('utf-8').strip()
@@ -138,22 +138,75 @@ class Entry:
             if self.attribute == ARCHIVE:
                 self.name += '.' + self.extensions_name
         else:
-            self.name = ""
+            self.name = ''
             for entry in reversed(self.sub_entries):
                 self.name += entry.sub_name.strip(b'\xff\xff'.decode('utf-16'))
+            self.name = self.name[0 : len(self.name) - 1]
+
+    def setPath(self):
+        self.path += f'\{self.name}'
 
 
     # get file's attribute
     def getAttribute(self):
         return self.attribute
+    
+    def getFileName(self):
+        return self.name
+    
+    def getChildrenList(self):
+        return self.children
 
 
-    # show file's information
+    # get file's information
+    def getInfo(self):
+        if self.isDeleted() == True:
+            return "This file is deleted"
+    
+        content = ""
+        content += "\nPath: " + str(self.path)
+        content += "\nName: " + str(self.name)
+        content = "\nAttribute: "
+        if (self.attribute == READ_ONLY):
+            content += "READ ONLY"
+        if (self.attribute == HIDDEN):
+            content += "HIDDEN"
+        if (self.attribute == SYSTEM):
+            content += "SYSTEM"
+        if (self.attribute == VOL_LABEL):
+            content += "VOLUME ID"
+        if (self.attribute == DIRECTORY):
+            content += "DIRECTORY"
+        if (self.attribute == ARCHIVE):
+            content += "ARCHIVE"
+        try:
+            content += "\nCreation time: " + str(self.created_time.strftime('%d.%m.%Y %H:%M:%S:%f'))
+            content += "\nLast Accessed time: " + str(self.last_accessed_date.strftime('%d.%m.%Y'))
+            content += "\nModification time: " + str(self.last_modified_time.strftime('%d.%m.%Y %H:%M:%S'))
+        except:
+            pass
+        content += "\nFirst cluster: " + str(self.starting_cluster)
+        content += "\nNumber of clusters: " + str(self.cluster_count)
+        content += "\nFilesize: " + str(self.size) + " (bytes)"
+        content += "\nEntry count: " + str(len(self.sub_entries) + 1)
+        content += "\n[Start Sector - End Sector]: " + str(self.starting_sector) + " - " + str(self.starting_sector + self.sector_count)
+        # content += "\n-------------------"
+        # if self.extensions_name == 'txt' or self.extensions_name == 'TXT':
+        #     content += "\nContent:"
+        #     content += self.content
+
+        # if self.attribute == DIRECTORY:
+        #     for child_entry in self.children:
+        #         child_entry.showInfo()
+
+        return content
+    
+
     def showInfo(self):
+        print(self.path)
         if self.isDeleted() == True:
             print("This file is deleted")
             return
-        self.setFullName()
         print("\nName: " + self.name)
         attribute = "\nAttribute: "
         if (self.attribute == READ_ONLY):
@@ -221,19 +274,19 @@ class SubEntry():
 
 class Root:
     def __init__(self, disk):
+        self.path = f"{disk}:"
         self.disk = disk
         self.boot_sector = BootSector(disk)
         self.fat = FatTable(disk, self.boot_sector)
-        self.name = None
         self.tmp_sub_entries = []
-        self.children = self.readInfo(self.boot_sector.rdet_first_sector)
+        self.children = self.readInfo(self.path, self.boot_sector.rdet_first_sector)
         self.readDirectoryChildren(self.children)
         
-    def readInfo(self, starting_sector):
+    def readInfo(self, parent_path, starting_sector):
         index = 1
         directory_tree = []
         while True:
-            entry = Entry(self.disk, starting_sector, index, self.fat)
+            entry = Entry(parent_path, self.disk, starting_sector, index, self.fat)
             sub_entry = SubEntry(self.disk, starting_sector, index)
             index += 1
 
@@ -249,37 +302,39 @@ class Root:
                 self.tmp_sub_entries.append(sub_entry)
             else:
                 entry.sub_entries = self.tmp_sub_entries.copy()
+                entry.setFullName()
+                entry.setPath()
                 self.tmp_sub_entries.clear()
                 directory_tree.append(entry)
         
     def readDirectoryChildren(self, root_entry_children):
         for entry in root_entry_children:
             if entry.getAttribute() == DIRECTORY:
-                entry.children = self.readInfo(entry.fat.getFirstSector(entry.starting_cluster))
+                entry.children = self.readInfo(entry.path, entry.fat.getFirstSector(entry.starting_cluster))
                 self.readDirectoryChildren(entry.children)
                 
-
 
     # show details of file 
     def showInfo(self):
         for entry in self.children:
             entry.showInfo()
+
+    def getPropertyFromPath(self, root_directory_children, path):
+        property = None
+        if path == self.path:
+            return "HARD DRIVE"
+        for entry in root_directory_children:
+            if path == entry.path:
+                return entry.getInfo()
+            
+            if entry.getAttribute() == DIRECTORY:
+                property = self.getPropertyFromPath(entry.children, path)
+        
+        return property
         
 
-
-
-
-
-
-
-
-
-
-# testing function
-
-# boot_sector = BootSector('E')
-# boot_sector.showInfo()
-
-root_directory = Root('E')
-root_directory.showInfo()
-
+    def getChildrenList(self):
+        return self.children
+    
+    def getRoot(self):
+        return self

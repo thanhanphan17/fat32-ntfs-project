@@ -139,7 +139,7 @@ class App(Frame):
             txt = data.showInfo()
             text = Text(frame, font=("Cambria", 12), bg=LIGHT_BLUE, spacing1=4, relief=FLAT)
             text.insert(END, txt)
-            text.pack(side=LEFT, padx=50, pady=10)
+            text.pack(side=LEFT, padx=80, pady=10)
         if (win32api.GetVolumeInformation(selected_drive.get())[4]=='NTFS'):
             path = "\\\.\\"
             for i in range(0, len(drive) - 1):
@@ -165,15 +165,15 @@ class App(Frame):
         parent_iid = self.tree.parent(item)
         if parent_iid:
             temp = self.tree.item(parent_iid)['text']
-            return self.getPath(parent_iid, "\\"+self.tree.item(item, "text")+path)
-        return "\\"+self.tree.item(item, "text")+path
+            return self.getPath(parent_iid, "\\" + self.tree.item(item, "text") + path)
+        return "\\" + self.tree.item(item, "text") + path
 
     def OnDoubleClick(self, event):
         item = self.tree.selection()
         print("you clicked on", self.tree.item(item, "text"))
-        filename, file_extension = os.path.splitext(self.tree.item(item, "text"))
-        file_extension=file_extension.lower()
-        if (file_extension==".txt"):
+        file_name, file_extension = os.path.splitext(self.tree.item(item, "text"))
+        file_extension = file_extension.lower()
+        if file_extension == ".txt":
             path = ''
             path = self.getPath(item, path)
             path = path[1:len(path)]
@@ -183,7 +183,7 @@ class App(Frame):
             window = Tk()
             window.title(self.tree.item(item, "text"))
             window.geometry("300x300+300+300")
-            text = Text(window, font=("Cambria", 12), bg="LIGHT_BLUE", spacing1=4, relief=FLAT)
+            text = Text(window, font=("Cambria", 12), bg=LIGHT_BLUE, spacing1=4, relief=FLAT)
             text.insert(END, data)
             text.pack()
             window.mainloop()
@@ -208,26 +208,24 @@ class App(Frame):
         print("you clicked on", self.tree.item(item, "text"))
         path = ''
         path = self.getPath(item, path)
-        path = path[1:len(path)]
-        property = self.treeOfDirectory.getPropertyFromPath(path)
-        # path = open(path, 'r', encoding='utf-8')
-        # data = path.read()
-        # path.close()
-        # print(property)
+        path = path[1 : len(path)]
+        # good until here
+        # print(path)
+        property = self.treeOfDirectory.getPropertyFromPath(self.treeOfDirectory.children, path)
         text.delete("1.0", END)
         text.insert(END, property)
 
-    def insertDirectory(self,root,disk):
+    def insertDirectory(self, root, disk):
         id = self.tree.insert('', 'end', text=disk, open=False)
-        self.insertNode(root,id)
+        self.insertChild(root,id)
 
-    def insertNode(self,root,id):
-        if (len(root.getChildrenList()) > 0):
-            childs = root.getChildrenList()
-            for child in childs:
+    def insertChild(self, root, id):
+        children = root.getChildrenList()
+        if (len(children) > 0):
+            for child in children:
                 index = self.tree.insert(id, 'end', text=child.getFileName(), open=False)
-                if child.isDirectory():
-                    self.insertNode(child,index)
+                if child.getAttribute() == DIRECTORY:
+                    self.insertChild(child,index)
 
     def autoscroll(self, sbar, first, last):
         """Hide and show scrollbar as needed."""
@@ -256,13 +254,14 @@ class App(Frame):
             path = "\\\.\\"
             for i in range(0, len(drive) - 1):
                 path += drive[i]
-            bootSectorData = BootSectorFAT32().readBootSector(path)
-            pbr_fat = PbrFat(bootSectorData)
-            pbr_fat.readFat()
-            fat_table = FatTable(path, pbr_fat)
-            dir = fat_table.getRootDirectory()
-            fat_table.getDirectory(dir)
-            self.treeOfDirectory = Root(fat_table.getDir())
+            # bootSectorData = BootSectorFAT32().readBootSector(path)
+            # pbr_fat = PbrFat(bootSectorData)
+            # pbr_fat.readFat()
+            # fat_table = FatTable(path, pbr_fat)
+            # dir = fat_table.getRootDirectory()
+            # fat_table.getDirectory(dir)
+            # self.treeOfDirectory = Root(fat_table.getDir())
+            self.treeOfDirectory = Root(drive[0])
         if (win32api.GetVolumeInformation(selected_drive.get())[4] == 'NTFS'):
             path = "\\\.\\"
             for i in range(0, len(drive) - 1):
@@ -283,7 +282,7 @@ class App(Frame):
         xsb = ttk.Scrollbar(frame_left, orient='horizontal', command=self.tree.xview)
         # Right-side
         frame_right = tk.Frame(splitter)
-        text = scrolledtext.ScrolledText(frame_right, font=("Cambria", 12), bg="LIGHT_BLUE", spacing1=4, relief=FLAT)
+        text = scrolledtext.ScrolledText(frame_right, font=("Cambria", 12), bg=LIGHT_BLUE, spacing1=4, relief=FLAT)
 
         # overall layout
         splitter.add(frame_left)
