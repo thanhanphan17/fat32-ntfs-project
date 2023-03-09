@@ -1,63 +1,10 @@
-from ntfs.directory.root import *
-from ntfs.pbs.pbs import *
-from ntfs.mft.mft import *
-
-
-from fat32_directory import *
-
-import tkinter
-from tkinter import *
-from tkinter import Tk, Text, TOP, BOTH, X, N, LEFT, scrolledtext, messagebox
-from tkinter import Frame, Label, Entry
-import tkinter as tk
-from tkinter import ttk
-from PIL import Image, ImageTk
-import win32api
-import os
-
-# Colors
-WHITE = '#FFFFFF'
-BLACK = '#000000'
-DARK = '#4D455D'
-PINK = '#FF7483'
-PURPLE = '#7F74B9'
-LIGHT = '#F5E9CF'
-LIGHT_BLUE = '#E9EFFF'
-BLUE = '#0052C0'
-YELLOW = '#FFCC8A'
-
-getApp = {".doc": "Microsoft Word",
-          ".docx": "Microsoft Word",
-          ".pdf": "Adobe Reader, Microsoft Edge,...",
-          ".tex": "LaTeX",
-          ".xls": "Microsoft Excel",
-          ".xlsx": "Microsoft Excel",
-          ".ppt": "Microsoft PowerPoint",
-          ".pptx": "Microsoft PowerPoint",
-          ".bmp": "Microsoft Photos",
-          ".png": "Microsoft Photos",
-          ".jpeg": "Microsoft Photos",
-          ".jpg": "Microsoft Photos",
-          ".mp3": "Window Media Player",
-          ".wav": "Window Media Player",
-          ".psd": "Adobe Photoshop",
-          ".mp4": "Microsoft Movies & TV, Window Media Player,...",
-          ".avi": "Microsoft Movies & TV, Window Media Player,...",
-          ".mov": "Microsoft Movies & TV, Window Media Player,...",
-          ".rar": "Rar, 7-zip,...",
-          ".7z": "Rar,7-Zip,...",
-          ".zip": "Rar,7-Zip,...",
-          ".exe": "Command prompt",
-          ".html": "Microsoft Edge",
-          ".htm": "Microsoft Edge"
-          }
-
+from config import *
 
 class App(Frame):
     def __init__(self, parent):
         Frame.__init__(self, parent)
-
-        # root
+        
+        # Root directory tree
         self.treeOfDirectory = None
 
         self.parent = parent
@@ -111,9 +58,6 @@ class App(Frame):
         label = Label(imgFrame, image=icon, bg=LIGHT_BLUE)
         label.image = icon
         label.pack(anchor='s', side=RIGHT, padx=20, pady=0)
-
-        # teacherTxt = Label(imgFrame, text="Teacher: Le Viet Long", font=("yu gothic ui", 14), bg=LIGHT_BLUE)
-        # teacherTxt.pack(anchor='s', side=LEFT, padx=5, pady=20)
 
         imgFrame.member = Image.open("./materials/member.png")
 

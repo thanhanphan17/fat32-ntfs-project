@@ -1,4 +1,4 @@
-from fat32_boot_sector import *
+from fat32.boot_sector import *
 import datetime
 
 # some const values
