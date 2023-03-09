@@ -260,9 +260,9 @@ class SubEntry():
         # Read entry's data
         sub_entry = getSectorData(disk, starting_sector, 1)
 
-        self.order = int.from_bytes(sub_entry[index * ENTRY_SIZE : index * ENTRY_SIZE + 1])
+        self.order = int.from_bytes(sub_entry[index * ENTRY_SIZE : index * ENTRY_SIZE + 1], byteorder="little")
         self.sub_name = sub_entry[index * ENTRY_SIZE + 1 : index * ENTRY_SIZE + 11].decode('utf-16')
-        self.attribute = int.from_bytes(sub_entry[index * ENTRY_SIZE + 11 : index * ENTRY_SIZE + 12])
+        self.attribute = int.from_bytes(sub_entry[index * ENTRY_SIZE + 11 : index * ENTRY_SIZE + 12], byteorder="little")
         self.sub_name += sub_entry[index * ENTRY_SIZE + 14 : index * ENTRY_SIZE + 26].decode('utf-16')
         self.sub_name += sub_entry[index * ENTRY_SIZE + 28 : index * ENTRY_SIZE + 32].decode('utf-16')
 
