@@ -118,9 +118,8 @@ class App(Frame):
 
     def OnDoubleClick(self, event):
         item = self.tree.selection()
-        # print("you clicked on", self.tree.item(item, "text"))
 
-        _, file_extension = os.path.splitext(self.tree.item(item, "text"))
+        file_name, file_extension = os.path.splitext(self.tree.item(item, "text"))
         file_extension = file_extension.lower()
         if file_extension == ".txt":
             path = ''
@@ -157,12 +156,11 @@ class App(Frame):
 
     def OnSelection(self, text):
         item = self.tree.selection()
-        # print("you clicked on", self.tree.item(item, "text"))
+        print("you clicked on", self.tree.item(item, "text"))
         path = ''
         path = self.getPath(item, path)
         path = path[1: len(path)]
-        # good until here
-        # print(path)
+
         try:
             property = self.treeOfDirectory.getPropertyFromPath(
                 self.treeOfDirectory.children, path)
@@ -187,8 +185,8 @@ class App(Frame):
                     if child.isDirectory():
                         self.insertNode(child, index)
                 except:
-                    if child.getAttribute() == DIRECTORY:
-                        self.insertChild(child, index)
+                    if child.getAttributeFAT32() == DIRECTORY_FAT32:
+                        self.insertNode(child, index)
 
     def autoscroll(self, sbar, first, last):
         """Hide and show scrollbar as needed."""
@@ -215,6 +213,10 @@ class App(Frame):
         # get tree information
         path = ""
         if (win32api.GetVolumeInformation(drive)[4] == 'FAT32'):
+            path = "\\\.\\"
+            for i in range(0, len(drive) - 1):
+                path += drive[i]
+
             self.treeOfDirectory = Root(drive[0])
 
         if (win32api.GetVolumeInformation(selected_drive.get())[4] == 'NTFS'):

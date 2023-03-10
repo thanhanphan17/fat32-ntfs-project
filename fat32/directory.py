@@ -10,7 +10,7 @@ DELETED_ENTRY = 0xE5
 
 # file's attribute
 ARCHIVE = 0x20
-DIRECTORY = 0x10
+DIRECTORY_FAT32 = 0x10
 VOL_LABEL = 0x08
 SYSTEM = 0x04
 HIDDEN = 0x02
@@ -148,7 +148,7 @@ class Entry:
 
 
     # get file's attribute
-    def getAttribute(self):
+    def getAttributeFAT32(self):
         return self.attribute
     
     def getFileName(self):
@@ -175,7 +175,7 @@ class Entry:
             content += "SYSTEM"
         if (self.attribute == VOL_LABEL):
             content += "VOLUME ID"
-        if (self.attribute == DIRECTORY):
+        if (self.attribute == DIRECTORY_FAT32):
             content += "DIRECTORY"
         if (self.attribute == ARCHIVE):
             content += "ARCHIVE"
@@ -217,7 +217,7 @@ class Entry:
             attribute += "SYSTEM"
         if (self.attribute == VOL_LABEL):
             attribute += "VOLUME ID"
-        if (self.attribute == DIRECTORY):
+        if (self.attribute == DIRECTORY_FAT32):
             attribute += "DIRECTORY"
         if (self.attribute == ARCHIVE):
             attribute += "ARCHIVE"
@@ -238,7 +238,7 @@ class Entry:
             print("\nContent:")
             print(self.content)
 
-        if self.attribute == DIRECTORY:
+        if self.attribute == DIRECTORY_FAT32:
             for child_entry in self.children:
                 child_entry.showInfo()
 
@@ -267,7 +267,7 @@ class SubEntry():
         self.sub_name += sub_entry[index * ENTRY_SIZE + 28 : index * ENTRY_SIZE + 32].decode('utf-16')
 
     # get file's attribute
-    def getAttribute(self):
+    def getAttributeFAT32(self):
         return SUB_ENTRY
     
 
@@ -298,7 +298,7 @@ class Root:
             if entry.isDeleted():
                 continue
 
-            if entry.getAttribute() == SUB_ENTRY:
+            if entry.getAttributeFAT32() == SUB_ENTRY:
                 self.tmp_sub_entries.append(sub_entry)
             else:
                 entry.sub_entries = self.tmp_sub_entries.copy()
@@ -309,7 +309,7 @@ class Root:
         
     def readDirectoryChildren(self, root_entry_children):
         for entry in root_entry_children:
-            if entry.getAttribute() == DIRECTORY:
+            if entry.getAttributeFAT32() == DIRECTORY_FAT32:
                 entry.children = self.readInfo(entry.path, entry.fat.getFirstSector(entry.starting_cluster))
                 self.readDirectoryChildren(entry.children)
                 
@@ -327,7 +327,7 @@ class Root:
             if path == entry.path:
                 return entry.getInfo()
             
-            if entry.getAttribute() == DIRECTORY:
+            if entry.getAttributeFAT32() == DIRECTORY_FAT32:
                 property = self.getPropertyFromPath(entry.children, path)
         
         return property
