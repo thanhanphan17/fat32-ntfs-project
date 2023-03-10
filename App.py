@@ -161,11 +161,14 @@ class App(Frame):
         path = self.getPath(item, path)
         path = path[1: len(path)]
 
+        property = None
+
         try:
-            property = self.treeOfDirectory.getPropertyFromPath(
+            property = self.treeOfDirectory.getPropertyFromFAT32Path(
                 self.treeOfDirectory.children, path)
         except:
             property = self.treeOfDirectory.getPropertyFromPath(path)
+
 
         text.delete("1.0", END)
         text.insert(END, property)

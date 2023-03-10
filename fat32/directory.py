@@ -190,14 +190,7 @@ class Entry:
         content += "\nFilesize: " + str(self.size) + " (bytes)"
         content += "\nEntry count: " + str(len(self.sub_entries) + 1)
         content += "\n[Start Sector - End Sector]: " + str(self.starting_sector) + " - " + str(self.starting_sector + self.sector_count)
-        # content += "\n-------------------"
-        # if self.extensions_name == 'txt' or self.extensions_name == 'TXT':
-        #     content += "\nContent:"
-        #     content += self.content
 
-        # if self.attribute == DIRECTORY:
-        #     for child_entry in self.children:
-        #         child_entry.showInfo()
 
         return content
     
@@ -319,16 +312,20 @@ class Root:
         for entry in self.children:
             entry.showInfo()
 
-    def getPropertyFromPath(self, root_directory_children, path):
+    def getPropertyFromFAT32Path(self, root_directory_children, path):
         property = None
         if path == self.path:
             return "HARD DRIVE"
+        
         for entry in root_directory_children:
             if path == entry.path:
                 return entry.getInfo()
             
             if entry.getAttributeFAT32() == DIRECTORY_FAT32:
-                property = self.getPropertyFromPath(entry.children, path)
+                property = self.getPropertyFromFAT32Path(entry.children, path)
+            
+            if property != None:
+                return property
         
         return property
         
